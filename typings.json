@@ -1,0 +1,9 @@
+{
+  "globalDependencies": {
+    "meteor": "registry:dt/meteor#1.3.0+20160627161920",
+    "node-4": "registry:dt/node-4#4.0.0+20161028141314"
+  },
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20161015015725"
+  }
+}

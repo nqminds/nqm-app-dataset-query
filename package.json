@@ -1,0 +1,52 @@
+{
+  "name": "nqm-app-datasetquery",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "babel-preset-stage-1": "^6.16.0",
+    "crypto": "0.0.3",
+    "emitter": "0.0.5",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "index.js": "0.0.3",
+    "lodash": "^4.16.6",
+    "material-ui": "^0.15.4",
+    "meteor-node-stubs": "^0.2.3",
+    "moment": "^2.15.2",
+    "nqm-api-tdx": "^0.1.21",
+    "os": "^0.1.1",
+    "path": "^0.12.7",
+    "react": "^15.3.2",
+    "react-addons-create-fragment": "^15.3.2",
+    "react-addons-css-transition-group": "^15.3.2",
+    "react-addons-linked-state-mixin": "^15.3.2",
+    "react-addons-perf": "^15.3.2",
+    "react-addons-pure-render-mixin": "^15.3.2",
+    "react-addons-test-utils": "^15.3.2",
+    "react-addons-update": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-infinite": "^0.10.0",
+    "react-komposer": "^1.13.1",
+    "react-mounter": "^1.2.0",
+    "react-tap-event-plugin": "^1.0.0",
+    "stream": "0.0.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.37"
+  },
+  "description": "NQM App Dataset Query",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nqminds/nqm-app-datasetquery.git"
+  },
+  "author": "Alexandru Mereacre",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nqminds/nqm-app-datasetquery/issues"
+  },
+  "homepage": "https://github.com/nqminds/nqm-app-datasetquery#readme"
+}

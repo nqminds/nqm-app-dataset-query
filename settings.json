@@ -1,0 +1,10 @@
+{
+	"public": {
+		"ddpServerURL": "https://tbx.nq-m.com/",
+		"authServerURL": "https://tdx.nq-m.com",
+    	"commandHost": "https://cmd.nq-m.com",
+    	"queryHost": "https://q.nq-m.com",
+		"sharedKeyFile": "nqm-wideaccess-key.js",
+		"showAppBar": false
+	}
+}
