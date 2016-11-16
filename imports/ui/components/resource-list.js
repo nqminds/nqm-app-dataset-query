@@ -1,17 +1,16 @@
 import React from "react";
 
-import {ListItem} from 'material-ui/List';
+import {List, ListItem} from 'material-ui/List';
 import ResourceIcon from "./resource-icon";
 
 class ResourceList extends React.Component {
-  _onListSelect(resource) {
-    // Fire the onSelect property handler.
-    this.props.onSelect(resource);
-    this._onSize = this._onSize.bind(this);
-  }
+    constructor(props) {
+      super(props);
 
-  _onSize(size) {
-    this.props.onSize(size);
+    }
+
+  _onListSelect(resource) {
+    this.props.onSelect(resource);
   }
 
   render() {
@@ -25,15 +24,30 @@ class ResourceList extends React.Component {
 
     // Render a list item for each resource. Bind the onTouchTap event so that it can propagate the selected resource up the event chain.
     const list = _.map(this.props.resources, (res) => {
-      return <ListItem innerDivStyle={styles.listItem} key={res.id} primaryText={res.name} onTouchTap={this._onListSelect.bind(this,res)} rightIcon={<ResourceIcon resourceType={res.schemaDefinition.basedOn} />} />
+      return <ListItem
+                innerDivStyle={styles.listItem}
+                key={res.id}
+                primaryText={res.name}
+                onTouchTap={this._onListSelect.bind(this,res)}
+                rightIcon={<ResourceIcon resourceType={res.schemaDefinition.basedOn}/>}
+              />
     });
-    
-    return ({list});
+    let component = null;
+    if (this.props.type)
+      return (
+        <List>
+          {list}
+        </List>);
+    else
+      return (
+        <List>
+          {list}
+        </List>);
   }
 }
 
 ResourceList.propTypes = {
-  onSize: React.PropTypes.func.isRequired,
+  type: React.PropTypes.bool.isRequired,
   resources: React.PropTypes.array.isRequired,
   onSelect: React.PropTypes.func.isRequired
 };

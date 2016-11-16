@@ -5,8 +5,9 @@ import {Meteor} from "meteor/meteor";
 import Snackbar from "material-ui/Snackbar";
 import RaisedButton from "material-ui/RaisedButton";
 import FontIcon from "material-ui/FontIcon";
-import Divider from "material-ui/Divider";
 import {List} from 'material-ui/List';
+import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
+  from 'material-ui/Table';
 import * as _ from "lodash";
 import TDXAPI from "nqm-api-tdx/client-api";
 
@@ -28,8 +29,6 @@ class QueryApp extends React.Component {
     this._onResource = this._onResource.bind(this);
     this._onBack = this._onBack.bind(this);
     this.parentList = [];
-    this.folderSize = 0;
-    this.resourceSize = 0;
 
     this.state = {
       snackBarMessage:"",
@@ -45,8 +44,7 @@ class QueryApp extends React.Component {
   };
 
   _onResource(resource) {
-    // A non-folder resource has been clicked on => attempt to show resource contents
-    //FlowRouter.go("resource", { id: resource.id });    
+    console.log(resource);    
   }
   
   _onFolder(folder) {
@@ -111,34 +109,56 @@ class QueryApp extends React.Component {
 
     // Filter to retrieve non-folder resources that are children of the current parent.
     const fileFilter = {parents: parentId, baseType: {$ne: "resourceGroup"}};
-    const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder} listSize={this.folderSize}/>;
-    const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource} listSize={this.resourceSize} />;
-    let listComponent = null;
-
-    console.log(folderComponent);
-    console.log(resourceComponent);
-
-    if (folderComponent.key!==null && resourceComponent.key!==null)
-      listComponent = <List>{folderComponent}{resourceComponent}</List>;
-    else if(folderComponent.key!==null && resourceComponent.key===null)
-      listComponent = <List>{folderComponent}</List>;
-    else if (folderComponent.key===null && resourceComponent.key!==null)
-      listComponent = <List>{resourceComponent}</List>;
+    const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder} type={true}/>;
+    const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource} type={false}/>;
     
     return (
       <div style={styles.root}>
       <div style={styles.leftPanel}>
         {backButton}
-        {listComponent}
+          {folderComponent}
+          {resourceComponent}
+
       </div>
       <div style={styles.mainPanel}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderColumn>ID</TableHeaderColumn>
+              <TableHeaderColumn>Name</TableHeaderColumn>
+              <TableHeaderColumn>Status</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableRowColumn>1</TableRowColumn>
+              <TableRowColumn>John Smith</TableRowColumn>
+              <TableRowColumn>Employed</TableRowColumn>
+            </TableRow>
+            <TableRow>
+              <TableRowColumn>2</TableRowColumn>
+              <TableRowColumn>Randal White</TableRowColumn>
+              <TableRowColumn>Unemployed</TableRowColumn>
+            </TableRow>
+            <TableRow>
+              <TableRowColumn>3</TableRowColumn>
+              <TableRowColumn>Stephanie Sanders</TableRowColumn>
+              <TableRowColumn>Employed</TableRowColumn>
+            </TableRow>
+            <TableRow>
+              <TableRowColumn>4</TableRowColumn>
+              <TableRowColumn>Steve Brown</TableRowColumn>
+              <TableRowColumn>Employed</TableRowColumn>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
-        <Snackbar
-          open={this.state.snackBarOpen}
-          message={this.state.snackBarMessage}
-          autoHideDuration={4000}
-          onRequestClose={this.handleSnackbarClose.bind(this)}
-        />
+      <Snackbar
+        open={this.state.snackBarOpen}
+        message={this.state.snackBarMessage}
+        autoHideDuration={4000}
+        onRequestClose={this.handleSnackbarClose.bind(this)}
+      />
       </div>
     );
   }
