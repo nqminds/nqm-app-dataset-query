@@ -28,6 +28,8 @@ class QueryApp extends React.Component {
     this._onResource = this._onResource.bind(this);
     this._onBack = this._onBack.bind(this);
     this.parentList = [];
+    this.folderSize = 0;
+    this.resourceSize = 0;
 
     this.state = {
       snackBarMessage:"",
@@ -109,8 +111,8 @@ class QueryApp extends React.Component {
 
     // Filter to retrieve non-folder resources that are children of the current parent.
     const fileFilter = {parents: parentId, baseType: {$ne: "resourceGroup"}};
-    const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder}/>;
-    const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource}/>;
+    const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder} listSize={this.folderSize}/>;
+    const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource} listSize={this.resourceSize} />;
     let listComponent = null;
 
     console.log(folderComponent);

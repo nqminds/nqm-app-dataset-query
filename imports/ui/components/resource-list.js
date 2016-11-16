@@ -7,7 +7,13 @@ class ResourceList extends React.Component {
   _onListSelect(resource) {
     // Fire the onSelect property handler.
     this.props.onSelect(resource);
+    this._onSize = this._onSize.bind(this);
   }
+
+  _onSize(size) {
+    this.props.onSize(size);
+  }
+
   render() {
     const styles = {
       list: {
@@ -27,6 +33,7 @@ class ResourceList extends React.Component {
 }
 
 ResourceList.propTypes = {
+  onSize: React.PropTypes.func.isRequired,
   resources: React.PropTypes.array.isRequired,
   onSelect: React.PropTypes.func.isRequired
 };
