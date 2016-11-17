@@ -8,16 +8,21 @@ import FontIcon from "material-ui/FontIcon";
 import {List} from "material-ui/List";
 import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from "material-ui/Table";
+import SelectField from "material-ui/SelectField";
+import MenuItem from 'material-ui/MenuItem';
 import Drawer from "material-ui/Drawer";
 import Chip from "material-ui/Chip";
 import Avatar from "material-ui/Avatar";
 import Checkbox from 'material-ui/Checkbox';
+import {blue300, indigo900} from "material-ui/styles/colors";
 import * as _ from "lodash";
 import TDXAPI from "nqm-api-tdx/client-api";
 
 import connectionManager from "../../api/manager/connection-manager";
 import ResourceList from "./resource-list-container";
 import ResourceIcon from "../components/resource-icon"
+
+const itemsPageData = {1:10, 2:50, 3:100};
 
 class QueryApp extends React.Component {
   constructor(props) {
@@ -45,7 +50,8 @@ class QueryApp extends React.Component {
       datasetID:null,
       drawerOpen: false,
       keyHeaderList:{},
-      totalCount: null
+      totalCount: null,
+      itemsPage: 1
     };
   }
 
@@ -59,6 +65,14 @@ class QueryApp extends React.Component {
     this.setState({
       drawerOpen: true
     });
+  }
+
+  handleNextChipTap() {
+
+  }
+
+  handlePrevChipTap() {
+
   }
 
   handleDrawerChange(open) {
@@ -79,6 +93,12 @@ class QueryApp extends React.Component {
 
     if (result)
       this.setState({keyHeaderList: keyHeaderList});
+  }
+
+  handleItemsPageChange(event, index, value) {
+    this.setState({
+      itemsPage: value
+    });
   }
 
   _onResource(resource) {
@@ -194,6 +214,10 @@ class QueryApp extends React.Component {
               />;
     });
 
+    let listMenuItems = _.map(itemsPageData, (val,key)=>{
+      return <MenuItem value={key} primaryText={val} key={key}/>;
+    });
+
     let tableHeaderComponent = null;
     
     if(!_.isEmpty(this.state.keyHeaderList)) {
@@ -209,30 +233,56 @@ class QueryApp extends React.Component {
     
     if (this.state.datasetID!==null) {
       nameChipComponent = 
-        <Chip style={styles.chip} onTouchTap={this.handleNameChipTap.bind(this)}>
+        <Chip
+          backgroundColor={blue300}
+          style={styles.chip}
+          onTouchTap={this.handleNameChipTap.bind(this)}
+        >
           {this.state.datasetName}
         </Chip>
     }
 
-    let totalCountChipComponent = null;
+    let totalCountChipComponent = null,
+      nextChipComponent = null,
+      prevChipComponent = null;
     if (this.state.totalCount!==null) {
       totalCountChipComponent = 
         <Chip style={styles.chip}>
           {this.state.totalCount}
-        </Chip>
+        </Chip>;
+      if (this.state.totalCount>itemsPageData[this.state.itemsPage]){
+        nextChipComponent = 
+          <Chip
+            backgroundColor={blue300}
+            style={styles.chip}
+            onTouchTap={this.handleNextChipTap.bind(this)}
+          >
+            Next Page
+          </Chip>;
+        prevChipComponent = 
+          <Chip
+            backgroundColor={blue300}
+            style={styles.chip}
+            onTouchTap={this.handlePrevChipTap.bind(this)}
+          >
+            Prev Page
+          </Chip>;
+      }
     }
 
     return (
       <div style={styles.root}>
       <div style={styles.leftPanel}>
         {backButton}
-          {folderComponent}
-          {resourceComponent}
+        {folderComponent}
+        {resourceComponent}
       </div>
       <div style={styles.mainPanel}>
         <div style={styles.wrapper}>
           {nameChipComponent}
           {totalCountChipComponent}
+          {prevChipComponent}
+          {nextChipComponent}
         </div>
         <Table>
           <TableHeader>
@@ -271,7 +321,14 @@ class QueryApp extends React.Component {
           onRequestClose={this.handleSnackbarClose.bind(this)}
         />
         <Drawer docked={false} open={this.state.drawerOpen} openSecondary={true} onRequestChange={this.handleDrawerChange.bind(this)}>
-          {checkBoxList}
+            {checkBoxList}
+            <SelectField
+              floatingLabelText="Items per page"
+              value={this.state.itemsPage}
+              onChange={this.handleItemsPageChange.bind(this)}
+            >
+              {listMenuItems}
+            </SelectField>
         </Drawer>
       </div>
     );
