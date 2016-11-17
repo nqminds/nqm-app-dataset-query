@@ -67,12 +67,17 @@ class QueryApp extends React.Component {
   }
   
   handleDrawerChecks(key, isInputChecked) {
-    let keyHeaderList = this.state.keyHeaderList;
+    let keyHeaderList = _.clone(this.state.keyHeaderList);
+    let result = false;
+
     keyHeaderList[key] = isInputChecked;
 
-    this.setState({
-      keyHeaderList: keyHeaderList
+    _.forEach(keyHeaderList,(val,key)=>{
+      result = result || val;
     });
+
+    if (result)
+      this.setState({keyHeaderList: keyHeaderList});
   }
 
   _onResource(resource) {
@@ -170,6 +175,17 @@ class QueryApp extends React.Component {
               />;
     });
 
+    let tableHeaderComponent = null;
+    
+    if(!_.isEmpty(this.state.keyHeaderList)) {
+      tableHeaderComponent = [];
+      _.forEach(this.state.keyHeaderList,(val,key)=>{
+        if (val) {
+          tableHeaderComponent.push((<TableHeaderColumn key={key}>{key}</TableHeaderColumn>));
+        }
+      });
+    }
+
     let nameChipComponent = null;
     
     if (this.state.datasetID!==null) {
@@ -191,9 +207,7 @@ class QueryApp extends React.Component {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHeaderColumn>ID</TableHeaderColumn>
-              <TableHeaderColumn>Name</TableHeaderColumn>
-              <TableHeaderColumn>Status</TableHeaderColumn>
+              {tableHeaderComponent}
             </TableRow>
           </TableHeader>
           <TableBody>
