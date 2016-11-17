@@ -5,14 +5,18 @@ import {Meteor} from "meteor/meteor";
 import Snackbar from "material-ui/Snackbar";
 import RaisedButton from "material-ui/RaisedButton";
 import FontIcon from "material-ui/FontIcon";
-import {List} from 'material-ui/List';
+import {List} from "material-ui/List";
 import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
-  from 'material-ui/Table';
+  from "material-ui/Table";
+import Drawer from "material-ui/Drawer";
+import Chip from "material-ui/Chip";
+import Avatar from "material-ui/Avatar";
 import * as _ from "lodash";
 import TDXAPI from "nqm-api-tdx/client-api";
 
 import connectionManager from "../../api/manager/connection-manager";
 import ResourceList from "./resource-list-container";
+import ResourceIcon from "../components/resource-icon"
 
 class QueryApp extends React.Component {
   constructor(props) {
@@ -33,7 +37,11 @@ class QueryApp extends React.Component {
     this.state = {
       snackBarMessage:"",
       snackBarOpen: false,
-      parent:[]
+      parent:[],
+      schemaDefinition:{},
+      datasetName:null,
+      datasetID:null,
+      drawerOpen: false
     };
   }
 
@@ -43,13 +51,29 @@ class QueryApp extends React.Component {
     });
   };
 
+  handleNameChipTap() {
+    this.setState({
+      drawerOpen: true
+    });
+  }
+
+  handleDrawerChange(open) {
+   this.setState({
+      drawerOpen: open
+    });
+  }
+  
   _onResource(resource) {
-    console.log(resource);    
+    this.setState({
+      datasetName: resource.name,
+      datasetID: resource.id,
+      schemaDefinition: resource.schemaDefinition  
+    });
+
   }
   
   _onFolder(folder) {
     // A folder resource has been clicked on => make the folder the new parent.
-    //FlowRouter.go("folder", { parent: folder.id });
     this.parentList.push(this.state.parent)
     this.setState({
       parent: folder.id
@@ -89,6 +113,9 @@ class QueryApp extends React.Component {
         top: appBarHeight,
         bottom: 0,
         width: leftPanelWidth
+      },
+      chip: {
+        margin: 4,
       }
     };
     
@@ -111,7 +138,16 @@ class QueryApp extends React.Component {
     const fileFilter = {parents: parentId, baseType: {$ne: "resourceGroup"}};
     const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder} type={true}/>;
     const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource} type={false}/>;
+    let nameChipComponent = null;
     
+    if (this.state.datasetName!==null) {
+      nameChipComponent = 
+        <Chip style={styles.chip} onTouchTap={this.handleNameChipTap.bind(this)}>
+          <Avatar icon={<ResourceIcon resourceType={["dataset"]}/>} />
+          {this.state.datasetName}
+        </Chip>
+    }
+
     return (
       <div style={styles.root}>
       <div style={styles.leftPanel}>
@@ -121,6 +157,7 @@ class QueryApp extends React.Component {
 
       </div>
       <div style={styles.mainPanel}>
+        {nameChipComponent}
         <Table>
           <TableHeader>
             <TableRow>
@@ -153,12 +190,14 @@ class QueryApp extends React.Component {
           </TableBody>
         </Table>
       </div>
-      <Snackbar
-        open={this.state.snackBarOpen}
-        message={this.state.snackBarMessage}
-        autoHideDuration={4000}
-        onRequestClose={this.handleSnackbarClose.bind(this)}
-      />
+        <Snackbar
+          open={this.state.snackBarOpen}
+          message={this.state.snackBarMessage}
+          autoHideDuration={4000}
+          onRequestClose={this.handleSnackbarClose.bind(this)}
+        />
+        <Drawer docked={false} open={this.state.drawerOpen} openSecondary={true} onRequestChange={this.handleDrawerChange.bind(this)}>
+        </Drawer>
       </div>
     );
   }
