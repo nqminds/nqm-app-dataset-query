@@ -183,6 +183,9 @@ class QueryApp extends React.Component {
       },
       checkbox: {
         marginBottom: 16,
+      },
+      button: {
+        margin: 12
       }
     };
     
@@ -279,23 +282,28 @@ class QueryApp extends React.Component {
         {folderComponent}
         {resourceComponent}
         <TextField
+          type='text'
           hintText="Filter"
           floatingLabelText="Filter"
           multiLine={true}
           rows={1}
         />
         <TextField
+          type='text'
           hintText="Options"
           floatingLabelText="Options"
           multiLine={true}
           rows={1}
         />
         <TextField
+          type='text'
           hintText="Pipeline"
           floatingLabelText="Pipeline"
           multiLine={true}
           rows={1}
         />
+        <RaisedButton label="Query" primary={true} style={styles.button} />
+        <RaisedButton label="Aggregate" secondary={true} style={styles.button} />
       </div>
       <div style={styles.mainPanel}>
         <div style={styles.wrapper}>
