@@ -44,7 +44,8 @@ class QueryApp extends React.Component {
       datasetName:null,
       datasetID:null,
       drawerOpen: false,
-      keyHeaderList:{}
+      keyHeaderList:{},
+      totalCount: null
     };
   }
 
@@ -87,13 +88,27 @@ class QueryApp extends React.Component {
         keyHeaderList[key]=true;
     });
 
-    this.setState({
-      datasetName: resource.name,
-      datasetID: resource.id,
-      schemaDefinition: resource.schemaDefinition,
-      keyHeaderList: keyHeaderList
+    const queryCount = '[{"$group":{"_id":null, "count":{"$sum":1}}}]';
+    this.tdxApi.getAggregateData(resource.id, queryCount, null,  (err, data)=>{
+      if(err){
+        console.log(err);
+      } else {
+        if(data.data.length) {
+          this.setState({
+            datasetName: resource.name,
+            datasetID: resource.id,
+            schemaDefinition: resource.schemaDefinition,
+            keyHeaderList: keyHeaderList,
+            totalCount: data.data[0].count
+          });
+        } else {
+          this.setState({
+            snackBarMessage:"Dataset "+resource.name+" has no schema!",
+            snackBarOpen: true
+          });
+        }
+      }
     });
-
   }
   
   _onFolder(folder) {
@@ -140,6 +155,10 @@ class QueryApp extends React.Component {
       },
       chip: {
         margin: 4,
+      },
+      wrapper: {
+        display: 'flex',
+        flexWrap: 'wrap',
       },
       checkbox: {
         marginBottom: 16,
@@ -195,6 +214,14 @@ class QueryApp extends React.Component {
         </Chip>
     }
 
+    let totalCountChipComponent = null;
+    if (this.state.totalCount!==null) {
+      totalCountChipComponent = 
+        <Chip style={styles.chip}>
+          {this.state.totalCount}
+        </Chip>
+    }
+
     return (
       <div style={styles.root}>
       <div style={styles.leftPanel}>
@@ -203,7 +230,10 @@ class QueryApp extends React.Component {
           {resourceComponent}
       </div>
       <div style={styles.mainPanel}>
-        {nameChipComponent}
+        <div style={styles.wrapper}>
+          {nameChipComponent}
+          {totalCountChipComponent}
+        </div>
         <Table>
           <TableHeader>
             <TableRow>

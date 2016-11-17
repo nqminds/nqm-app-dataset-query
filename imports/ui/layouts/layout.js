@@ -88,7 +88,7 @@ class Layout extends React.Component{
 
     var appBar;
     if (Meteor.settings.public.showAppBar !== false) {
-      appBar = <AppBar style={styles.appBar} title="NQM Parking Management" showMenuIconButton={false} iconElementRight={menuButton} />;
+      appBar = <AppBar style={styles.appBar} title="NQM Dataset Query" showMenuIconButton={false} iconElementRight={menuButton} />;
     }
 
     return (
