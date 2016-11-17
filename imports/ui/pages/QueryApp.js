@@ -8,6 +8,7 @@ import FontIcon from "material-ui/FontIcon";
 import {List} from "material-ui/List";
 import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from "material-ui/Table";
+import TextField from "material-ui/TextField";
 import SelectField from "material-ui/SelectField";
 import MenuItem from 'material-ui/MenuItem';
 import Drawer from "material-ui/Drawer";
@@ -22,7 +23,7 @@ import connectionManager from "../../api/manager/connection-manager";
 import ResourceList from "./resource-list-container";
 import ResourceIcon from "../components/resource-icon"
 
-const itemsPageData = {1:10, 2:50, 3:100};
+const itemsPageData = {1:10, 2:50, 3:100, 4:1000};
 
 class QueryApp extends React.Component {
   constructor(props) {
@@ -269,6 +270,7 @@ class QueryApp extends React.Component {
           </Chip>;
       }
     }
+    let self = this;
 
     return (
       <div style={styles.root}>
@@ -276,6 +278,24 @@ class QueryApp extends React.Component {
         {backButton}
         {folderComponent}
         {resourceComponent}
+        <TextField
+          hintText="Filter"
+          floatingLabelText="Filter"
+          multiLine={true}
+          rows={1}
+        />
+        <TextField
+          hintText="Options"
+          floatingLabelText="Options"
+          multiLine={true}
+          rows={1}
+        />
+        <TextField
+          hintText="Pipeline"
+          floatingLabelText="Pipeline"
+          multiLine={true}
+          rows={1}
+        />
       </div>
       <div style={styles.mainPanel}>
         <div style={styles.wrapper}>
@@ -324,7 +344,7 @@ class QueryApp extends React.Component {
             {checkBoxList}
             <SelectField
               floatingLabelText="Items per page"
-              value={this.state.itemsPage}
+              value={self.state.itemsPage}
               onChange={this.handleItemsPageChange.bind(this)}
             >
               {listMenuItems}
