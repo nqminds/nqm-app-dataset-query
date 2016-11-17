@@ -11,6 +11,7 @@ import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow,
 import Drawer from "material-ui/Drawer";
 import Chip from "material-ui/Chip";
 import Avatar from "material-ui/Avatar";
+import Checkbox from 'material-ui/Checkbox';
 import * as _ from "lodash";
 import TDXAPI from "nqm-api-tdx/client-api";
 
@@ -29,6 +30,7 @@ class QueryApp extends React.Component {
     });
 
     // Bind event handlers to "this"
+    this.handleDrawerChecks = this.handleDrawerChecks.bind(this);
     this._onFolder = this._onFolder.bind(this);
     this._onResource = this._onResource.bind(this);
     this._onBack = this._onBack.bind(this);
@@ -41,7 +43,8 @@ class QueryApp extends React.Component {
       schemaDefinition:{},
       datasetName:null,
       datasetID:null,
-      drawerOpen: false
+      drawerOpen: false,
+      keyHeaderList:{}
     };
   }
 
@@ -63,11 +66,27 @@ class QueryApp extends React.Component {
     });
   }
   
+  handleDrawerChecks(key, isInputChecked) {
+    let keyHeaderList = this.state.keyHeaderList;
+    keyHeaderList[key] = isInputChecked;
+
+    this.setState({
+      keyHeaderList: keyHeaderList
+    });
+  }
+
   _onResource(resource) {
+    let keyHeaderList = {};
+    
+    _.forEach(resource.schemaDefinition.dataSchema, (val,key)=>{
+        keyHeaderList[key]=true;
+    });
+
     this.setState({
       datasetName: resource.name,
       datasetID: resource.id,
-      schemaDefinition: resource.schemaDefinition  
+      schemaDefinition: resource.schemaDefinition,
+      keyHeaderList: keyHeaderList
     });
 
   }
@@ -116,6 +135,9 @@ class QueryApp extends React.Component {
       },
       chip: {
         margin: 4,
+      },
+      checkbox: {
+        marginBottom: 16,
       }
     };
     
@@ -138,12 +160,21 @@ class QueryApp extends React.Component {
     const fileFilter = {parents: parentId, baseType: {$ne: "resourceGroup"}};
     const folderComponent = <ResourceList filter={folderFilter} options={{sort: { sortName: 1}}} onSelect={this._onFolder} type={true}/>;
     const resourceComponent = <ResourceList filter={fileFilter} options={{sort: { sortName: 1}}} onSelect={this._onResource} type={false}/>;
+    const checkBoxList = _.map(this.state.keyHeaderList, (val,key)=>{
+      return <Checkbox
+                onCheck={(event, isInputChecked)=>{this.handleDrawerChecks(key, isInputChecked)}}
+                key={key}
+                label={key}
+                checked={val}
+                style={styles.checkbox}
+              />;
+    });
+
     let nameChipComponent = null;
     
-    if (this.state.datasetName!==null) {
+    if (this.state.datasetID!==null) {
       nameChipComponent = 
         <Chip style={styles.chip} onTouchTap={this.handleNameChipTap.bind(this)}>
-          <Avatar icon={<ResourceIcon resourceType={["dataset"]}/>} />
           {this.state.datasetName}
         </Chip>
     }
@@ -154,7 +185,6 @@ class QueryApp extends React.Component {
         {backButton}
           {folderComponent}
           {resourceComponent}
-
       </div>
       <div style={styles.mainPanel}>
         {nameChipComponent}
@@ -197,6 +227,7 @@ class QueryApp extends React.Component {
           onRequestClose={this.handleSnackbarClose.bind(this)}
         />
         <Drawer docked={false} open={this.state.drawerOpen} openSecondary={true} onRequestChange={this.handleDrawerChange.bind(this)}>
+          {checkBoxList}
         </Drawer>
       </div>
     );
