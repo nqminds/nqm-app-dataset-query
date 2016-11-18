@@ -11,6 +11,7 @@ function loadResourceData({
     options,
     load
 }, onData) {
+
   if (load) {
     const config = {
       commandHost: Meteor.settings.public.commandHost,
