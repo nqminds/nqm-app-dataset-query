@@ -10,12 +10,12 @@ class TableContent extends React.Component {
 
   componentWillMount() {
     if (this.props.data.length)
-      this.tableData = this.props.data;
+      this.tableData = _.clone(this.props.data);
   }
 
   componentWillReceiveProps(nextprops) {
     if (nextprops.data.length)
-      this.tableData = nextprops.data;   
+      this.tableData = _.clone(nextprops.data);
   }
 
   render() {

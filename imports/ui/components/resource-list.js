@@ -7,7 +7,17 @@ import * as _ from "lodash";
 class ResourceList extends React.Component {
   constructor(props) {
     super(props);
+    this.resources = [];
+  }
 
+  componentWillMount() {
+    if (this.props.load)
+      this.resources = this.props.resources;
+  }
+
+  componentWillReceiveProps(nextprops) {
+    if (this.props.load)
+      this.resources = nextprops.resources;   
   }
 
   _onListSelect(resource) {
@@ -24,7 +34,7 @@ class ResourceList extends React.Component {
     };
 
     // Render a list item for each resource. Bind the onTouchTap event so that it can propagate the selected resource up the event chain.
-    const list = _.map(this.props.resources, (res) => {
+    const list = _.map(this.resources, (res) => {
       return (
         <ListItem
           innerDivStyle={styles.listItem}
@@ -48,6 +58,7 @@ class ResourceList extends React.Component {
 }
 
 ResourceList.propTypes = {
+  load: React.PropTypes.bool.isRequired,
   type: React.PropTypes.bool.isRequired,
   resources: React.PropTypes.array.isRequired,
   onSelect: React.PropTypes.func.isRequired

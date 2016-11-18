@@ -37,6 +37,11 @@ class QueryApp extends React.Component {
     this._onFolder = this._onFolder.bind(this);
     this._onResource = this._onResource.bind(this);
     this._onBack = this._onBack.bind(this);
+    this.onQueryHandle = this.onQueryHandle.bind(this);
+    this.onAggregateHandle = this.onAggregateHandle.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleOptionsChange = this.handleOptionsChange.bind(this);
+    this.handlePipelineChange = this.handlePipelineChange.bind(this);
     this.parentList = [];
 
     this.queryCount = 0;
@@ -56,6 +61,7 @@ class QueryApp extends React.Component {
       datasetFilter: "{}",
       datasetPipeline: "[]",
       datasetLoad: false,
+      resourceLoad: true,
       currentPage: 0
     };
   }
@@ -112,8 +118,11 @@ class QueryApp extends React.Component {
   }
 
   handleItemsPageChange(event, index, value) {
+    let currentPage = this.state.currentPage;
+    if (currentPage) currentPage = 1;
     this.setState({
       itemsPage: value,
+      currentPage: currentPage
     });
   }
 
@@ -129,7 +138,9 @@ class QueryApp extends React.Component {
       if (err) {
         this.setState({
           snackBarMessage: "Can't load dataset " + resource.name ,
-          snackBarOpen: true
+          snackBarOpen: true,
+          loadResource: false,
+          datasetLoad: false,
         });
       } else {
         if (data.data.length) {
@@ -142,12 +153,15 @@ class QueryApp extends React.Component {
             keyHeaderList: keyHeaderList,
             totalCount: data.data[0].count,
             datasetLoad: true,
-            currentPage: 1
+            currentPage: 1,
+            resourceLoad: false
           });
         } else {
           this.setState({
             snackBarMessage: "Dataset " + resource.name + " has no schema!",
-            snackBarOpen: true
+            snackBarOpen: true,
+            resourceLoad: false,
+            datasetLoad: false,
           });
         }
       }
@@ -167,6 +181,35 @@ class QueryApp extends React.Component {
     this.setState({
       parent: parent
     });
+  }
+
+  onQueryHandle() {
+    console.log(this.state.datasetFilter);
+  }
+
+  onAggregateHandle() {
+
+  }
+
+  handleFilterChange(event) {
+    this.setState({
+      datasetFilter: event.target.value,
+      datasetLoad: false,
+    });
+  }
+
+  handleOptionsChange(event) {
+    this.setState({
+      datasetOptions: event.target.value,
+      datasetLoad: false,
+    });    
+  }
+
+  handlePipelineChange(event) {
+    this.setState({
+      datasetPipeline: event.target.value,
+      datasetLoad: false,
+    });    
   }
 
   componentWillMount() {
@@ -228,8 +271,20 @@ class QueryApp extends React.Component {
 
     // Filter to retrieve non-folder resources that are children of the current parent.
     const fileFilter = { parents: parentId, baseType: { $ne: "resourceGroup" } };
-    const folderComponent = <ResourceList filter={folderFilter} options={{ sort: { sortName: 1 } }} onSelect={this._onFolder} type={true} />;
-    const resourceComponent = <ResourceList filter={fileFilter} options={{ sort: { sortName: 1 } }} onSelect={this._onResource} type={false} />;
+    const folderComponent = <ResourceList
+      load={this.state.resourceLoad}
+      filter={folderFilter}
+      options={{ sort: { sortName: 1 } }}
+      onSelect={this._onFolder} type={true}
+      />;
+    const resourceComponent = <ResourceList
+      load={this.state.resourceLoad}
+      filter={fileFilter}
+      options={{ sort: { sortName: 1 } }}
+      onSelect={this._onResource}
+      type={false}
+      />;
+
     const checkBoxList = _.map(this.state.keyHeaderList, (val, key) => {
       return ( 
         <Checkbox
@@ -298,21 +353,39 @@ class QueryApp extends React.Component {
     let self = this;
     let datasetOptions = JSON.parse(this.state.datasetOptions);
     datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
-    
+
     if (this.state.currentPage>1)
       datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
-   
+
     return (
       <div style={styles.root}>
         <div style={styles.leftPanel}>
           {backButton}
           {folderComponent}
           {resourceComponent}
-          <TextField hintText="Filter" floatingLabelText="Filter" value={this.state.datasetFilter} multiLine={true} rows={1}/>
-          <TextField hintText="Options" floatingLabelText="Options" value={this.state.datasetOptions} multiLine={true} rows={1}/>
-          <TextField hintText="Pipeline" floatingLabelText="Pipeline" value={this.state.datasetPipeline} multiLine={true} rows={1}/>
-          <RaisedButton label="Query" primary={true} style={styles.button} />
-          <RaisedButton label="Aggregate" secondary={true} style={styles.button} />
+          <TextField
+            hintText="Filter"
+            floatingLabelText="Filter"
+            value={this.state.datasetFilter}
+            multiLine={true} rows={1}
+            onChange={this.handleFilterChange}
+          />
+          <TextField
+            hintText="Options"
+            floatingLabelText="Options"
+            value={this.state.datasetOptions}
+            multiLine={true} rows={1}
+            onChange={this.handleOptionsChange}
+          />
+          <TextField
+            hintText="Pipeline"
+            floatingLabelText="Pipeline"
+            value={this.state.datasetPipeline}
+            multiLine={true} rows={1}
+            onChange={this.handlePipelineChange}
+          />
+          <RaisedButton label="Query" primary={true} style={styles.button} onTouchTap={this.onQueryHandle}/>
+          <RaisedButton label="Aggregate" secondary={true} style={styles.button} onTouchTap={this.onAggregateHandle}/>
         </div>
         <div style={styles.mainPanel}>
           <div style={styles.wrapper}>
