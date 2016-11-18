@@ -39,6 +39,8 @@ class QueryApp extends React.Component {
     this._onBack = this._onBack.bind(this);
     this.parentList = [];
 
+    this.queryCount = 0;
+
     this.state = {
       snackBarMessage: "",
       snackBarOpen: false,
@@ -50,10 +52,11 @@ class QueryApp extends React.Component {
       keyHeaderList: {},
       totalCount: null,
       itemsPage: 1,
-      datasetOptions: {},
-      datasetFilter: {},
-      datasetPipeline: "",
-      datasetLoad: false
+      datasetOptions: "{}",
+      datasetFilter: "{}",
+      datasetPipeline: "[]",
+      datasetLoad: false,
+      currentPage: 0
     };
   }
 
@@ -70,11 +73,19 @@ class QueryApp extends React.Component {
   }
 
   handleNextChipTap() {
+    let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+    let currentPage = this.state.currentPage;
 
+    if (totalPages && currentPage<totalPages)
+      this.setState({currentPage: currentPage+1});
   }
 
   handlePrevChipTap() {
+    let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+    let currentPage = this.state.currentPage;
 
+    if (totalPages && currentPage>1)
+      this.setState({currentPage: currentPage-1});
   }
 
   handleDrawerChange(open) {
@@ -122,13 +133,16 @@ class QueryApp extends React.Component {
         });
       } else {
         if (data.data.length) {
+          this.queryCount = data.data[0].count;
+
           this.setState({
             datasetName: resource.name,
             datasetID: resource.id,
             schemaDefinition: resource.schemaDefinition,
             keyHeaderList: keyHeaderList,
             totalCount: data.data[0].count,
-            datasetLoad: true
+            datasetLoad: true,
+            currentPage: 1
           });
         } else {
           this.setState({
@@ -246,14 +260,20 @@ class QueryApp extends React.Component {
 
     let totalCountChipComponent = null,
       nextChipComponent = null,
-      prevChipComponent = null;
+      prevChipComponent = null,
+      pageComponent = null;
+
     if (this.state.totalCount !== null) {
       totalCountChipComponent =
         <Chip style={styles.chip}>
           {this.state.totalCount}
         </Chip>;
-      if (this.state.totalCount > itemsPageData[this.state.itemsPage]) {
-        nextChipComponent =
+    }
+
+    if (this.queryCount > itemsPageData[this.state.itemsPage]) {
+      let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+
+      nextChipComponent =
           <Chip
             backgroundColor={blue300}
             style={styles.chip}
@@ -261,7 +281,7 @@ class QueryApp extends React.Component {
             >
             Next Page
           </Chip>;
-        prevChipComponent =
+      prevChipComponent =
           <Chip
             backgroundColor={blue300}
             style={styles.chip}
@@ -269,20 +289,28 @@ class QueryApp extends React.Component {
             >
             Prev Page
           </Chip>;
-      }
+      pageComponent = 
+          <Chip style={styles.chip}>
+            {this.state.currentPage}/{totalPages}
+          </Chip>;
     }
 
     let self = this;
+    let datasetOptions = JSON.parse(this.state.datasetOptions);
+    datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
     
+    if (this.state.currentPage>1)
+      datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
+   
     return (
       <div style={styles.root}>
         <div style={styles.leftPanel}>
           {backButton}
           {folderComponent}
           {resourceComponent}
-          <TextField hintText="Filter" floatingLabelText="Filter" multiLine={true} rows={1}/>
-          <TextField hintText="Options" floatingLabelText="Options" multiLine={true} rows={1}/>
-          <TextField hintText="Pipeline" floatingLabelText="Pipeline" multiLine={true} rows={1}/>
+          <TextField hintText="Filter" floatingLabelText="Filter" value={this.state.datasetFilter} multiLine={true} rows={1}/>
+          <TextField hintText="Options" floatingLabelText="Options" value={this.state.datasetOptions} multiLine={true} rows={1}/>
+          <TextField hintText="Pipeline" floatingLabelText="Pipeline" value={this.state.datasetPipeline} multiLine={true} rows={1}/>
           <RaisedButton label="Query" primary={true} style={styles.button} />
           <RaisedButton label="Aggregate" secondary={true} style={styles.button} />
         </div>
@@ -292,12 +320,13 @@ class QueryApp extends React.Component {
             {totalCountChipComponent}
             {prevChipComponent}
             {nextChipComponent}
+            {pageComponent}
           </div>
           <TableContainer
             keyHeaderList={this.state.keyHeaderList}
             resourceId={this.state.datasetID}
             filter={this.state.datasetFilter}
-            options={this.state.datasetOptions}
+            options={datasetOptions}
             load={this.state.datasetLoad}
           />
         </div>

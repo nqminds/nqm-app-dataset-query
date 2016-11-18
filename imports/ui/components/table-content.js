@@ -31,7 +31,12 @@ class TableContent extends React.Component {
     if (this.tableData.length) {
       tableRowList = this.tableData.map((row, index)=>{
         let rowObj = _.map(keyList,(val)=>{
-          return <TableRowColumn key={val}>{row[val]}</TableRowColumn>;
+          let entry = "";
+          if (row[val]!==null && !_.isObject(row[val])) entry = row[val];
+          else if (row[val]!==null && _.isObject(row[val]))
+            entry = JSON.stringify(row[val]);
+
+          return <TableRowColumn key={val}>{entry}</TableRowColumn>;
         });
         return <TableRow key={index}>{rowObj}</TableRow>;
       });
