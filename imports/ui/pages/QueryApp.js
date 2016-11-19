@@ -61,19 +61,25 @@ class QueryApp extends React.Component {
       datasetPipeline: "[]",
       datasetLoad: false,
       resourceLoad: true,
-      currentPage: 0
+      currentPage: 0,
+      commandButtonState: true,
+      queryCount: null
     };
   }
 
   handleSnackbarClose() {
     this.setState({
-      snackBarOpen: false
+      snackBarOpen: false,
+      datasetLoad: false,
+      resourceLoad: false
     });
   }
 
   handleNameChipTap() {
     this.setState({
-      drawerOpen: true
+      drawerOpen: true,
+      datasetLoad: false,
+      resourceLoad: false
     });
   }
 
@@ -84,7 +90,8 @@ class QueryApp extends React.Component {
     if (totalPages && currentPage<totalPages)
       this.setState({
         currentPage: currentPage+1,
-        datasetLoad: true
+        datasetLoad: true,
+        resourceLoad: false
       });
   }
 
@@ -95,14 +102,16 @@ class QueryApp extends React.Component {
     if (totalPages && currentPage>1)
       this.setState({
         currentPage: currentPage-1,
-        datasetLoad: true
+        datasetLoad: true,
+        resourceLoad: false
       });
   }
 
   handleDrawerChange(open) {
     this.setState({
       drawerOpen: open,
-      datasetLoad: false
+      datasetLoad: false,
+      resourceLoad: false
     });
   }
 
@@ -119,7 +128,8 @@ class QueryApp extends React.Component {
     if (result)
       this.setState({
         keyHeaderList: keyHeaderList,
-        datasetLoad: false
+        datasetLoad: false,
+        resourceLoad: false
       });
   }
 
@@ -129,7 +139,8 @@ class QueryApp extends React.Component {
     this.setState({
       itemsPage: value,
       currentPage: currentPage,
-      datasetLoad: true
+      datasetLoad: true,
+      resourceLoad: false
     });
   }
 
@@ -140,6 +151,7 @@ class QueryApp extends React.Component {
       this.setState({
         parent: resource.id,
         datasetLoad: false,
+        resourceLoad: true
       });
     } else if (resource.baseType==="dataset") {
       this.onResource(resource);      
@@ -174,7 +186,8 @@ class QueryApp extends React.Component {
             totalCount: data.data[0].count,
             datasetLoad: true,
             currentPage: 1,
-            resourceLoad: false
+            resourceLoad: false,
+            commandButtonState: false
           });
         } else {
           this.setState({
@@ -191,11 +204,44 @@ class QueryApp extends React.Component {
   onBack() {
     const parent = this.parentList.pop();
     this.setState({
-      parent: parent
+      parent: parent,
+      datasetLoad: false,
+      resourceLoad: true
     });
   }
 
   onQueryHandle() {
+    try {
+      JSON.parse(this.state.datasetFilter);
+      const queryCount = "[{\"$match\":" + this.state.datasetFilter + "}," +
+        "{\"$group\":{\"_id\":null, \"count\":{\"$sum\":1}}}]";
+      //{"SiteCode":{"$eq":"BG1"}}
+
+      this.tdxApi.getAggregateData(this.state.datasetID, queryCount, null, (err, data) => {
+        if (err) {
+          this.setState({
+            snackBarMessage: "Can't get query count for " + this.state.datasetName ,
+            snackBarOpen: true,
+            resourceLoad: false,
+            datasetLoad: false,
+          });
+        } else {
+          this.setState({
+            queryCount: data.data[0].count,
+            datasetLoad: true,
+            currentPage: 1,
+            resourceLoad: false
+          });
+        }
+      });
+    } catch(e) {
+      this.setState({
+        snackBarMessage: e.toString(),
+        snackBarOpen: true,
+        resourceLoad: false,
+        datasetLoad: false,
+      });
+    }
   }
 
   onAggregateHandle() {
@@ -206,6 +252,7 @@ class QueryApp extends React.Component {
     this.setState({
       datasetFilter: event.target.value,
       datasetLoad: false,
+      resourceLoad: false
     });
   }
 
@@ -213,6 +260,7 @@ class QueryApp extends React.Component {
     this.setState({
       datasetOptions: event.target.value,
       datasetLoad: false,
+      resourceLoad: false
     });    
   }
 
@@ -220,6 +268,7 @@ class QueryApp extends React.Component {
     this.setState({
       datasetPipeline: event.target.value,
       datasetLoad: false,
+      resourceLoad: false
     });    
   }
 
@@ -315,12 +364,20 @@ class QueryApp extends React.Component {
     let totalCountChipComponent = null,
       nextChipComponent = null,
       prevChipComponent = null,
-      pageComponent = null;
+      pageComponent = null,
+      queryCountComponent = null;
 
     if (this.state.totalCount !== null) {
       totalCountChipComponent =
         <Chip style={styles.chip}>
           {this.state.totalCount}
+        </Chip>;
+    }
+
+    if (this.state.queryCount !== null) {
+      queryCountComponent =
+        <Chip style={styles.chip}>
+          {this.state.queryCount}
         </Chip>;
     }
 
@@ -352,6 +409,7 @@ class QueryApp extends React.Component {
     let self = this;
     let datasetOptions = JSON.parse(this.state.datasetOptions);
     datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
+    let datasetFilter = JSON.parse(this.state.datasetOptions);
 
     if (this.state.currentPage>1)
       datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
@@ -365,30 +423,43 @@ class QueryApp extends React.Component {
             hintText="Filter"
             floatingLabelText="Filter"
             value={this.state.datasetFilter}
-            multiLine={true} rows={1}
+            multiLine={true} rows={1} rowsMax={4}
             onChange={this.handleFilterChange}
           />
           <TextField
             hintText="Options"
             floatingLabelText="Options"
             value={this.state.datasetOptions}
-            multiLine={true} rows={1}
+            multiLine={true} rows={1} rowsMax={4}
             onChange={this.handleOptionsChange}
           />
           <TextField
             hintText="Pipeline"
             floatingLabelText="Pipeline"
             value={this.state.datasetPipeline}
-            multiLine={true} rows={1}
+            multiLine={true} rows={1} rowsMax={4}
             onChange={this.handlePipelineChange}
           />
-          <RaisedButton label="Query" primary={true} style={styles.button} onTouchTap={this.onQueryHandle}/>
-          <RaisedButton label="Aggregate" secondary={true} style={styles.button} onTouchTap={this.onAggregateHandle}/>
+          <RaisedButton
+            label="Query"
+            primary={true}
+            style={styles.button}
+            onTouchTap={this.onQueryHandle}
+            disabled={this.state.commandButtonState}
+          />
+          <RaisedButton
+            label="Aggregate"
+            secondary={true}
+            style={styles.button}
+            onTouchTap={this.onAggregateHandle}
+            disabled={this.state.commandButtonState}
+          />
         </div>
         <div style={styles.mainPanel}>
           <div style={styles.wrapper}>
             {nameChipComponent}
             {totalCountChipComponent}
+            {queryCountComponent}
             {prevChipComponent}
             {pageComponent}            
             {nextChipComponent}

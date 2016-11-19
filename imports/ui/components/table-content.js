@@ -9,13 +9,11 @@ class TableContent extends React.Component {
   }
 
   componentWillMount() {
-    //if (this.props.data.length)
     if (this.props.load)
       this.tableData = _.clone(this.props.data);
   }
 
   componentWillReceiveProps(nextprops) {
-    //if (nextprops.data.length)
     if (nextprops.load)
       this.tableData = _.clone(nextprops.data);
   }
