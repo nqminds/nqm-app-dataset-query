@@ -16,8 +16,8 @@ class ResourceList extends React.Component {
   }
 
   componentWillReceiveProps(nextprops) {
-    if (this.props.load)
-      this.resources = nextprops.resources;   
+    if (nextprops.load)
+      this.resources = nextprops.resources;
   }
 
   _onListSelect(resource) {
@@ -44,22 +44,16 @@ class ResourceList extends React.Component {
           rightIcon={<ResourceIcon resourceType={res.schemaDefinition.basedOn} />}
         />);
     });
-    if (this.props.type)
-      return (
-        <List>
-          {list}
-        </List>);
-    else
-      return (
-        <List>
-          {list}
-        </List>);
+
+    return (
+      <List>
+        {list}
+      </List>);
   }
 }
 
 ResourceList.propTypes = {
   load: React.PropTypes.bool.isRequired,
-  type: React.PropTypes.bool.isRequired,
   resources: React.PropTypes.array.isRequired,
   onSelect: React.PropTypes.func.isRequired
 };

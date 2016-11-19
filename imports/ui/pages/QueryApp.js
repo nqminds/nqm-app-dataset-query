@@ -5,7 +5,6 @@ import { Meteor } from "meteor/meteor";
 import Snackbar from "material-ui/Snackbar";
 import RaisedButton from "material-ui/RaisedButton";
 import FontIcon from "material-ui/FontIcon";
-import { Table, TableHeader, TableHeaderColumn, TableRow, TableRowColumn, TableBody} from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
@@ -34,14 +33,14 @@ class QueryApp extends React.Component {
 
     // Bind event handlers to "this"
     this.handleDrawerChecks = this.handleDrawerChecks.bind(this);
-    this._onFolder = this._onFolder.bind(this);
-    this._onResource = this._onResource.bind(this);
-    this._onBack = this._onBack.bind(this);
+    this.onResource = this.onResource.bind(this);
+    this.onBack = this.onBack.bind(this);
     this.onQueryHandle = this.onQueryHandle.bind(this);
     this.onAggregateHandle = this.onAggregateHandle.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleOptionsChange = this.handleOptionsChange.bind(this);
     this.handlePipelineChange = this.handlePipelineChange.bind(this);
+    this.handleClickResource = this.handleClickResource.bind(this);
     this.parentList = [];
 
     this.queryCount = 0;
@@ -83,7 +82,10 @@ class QueryApp extends React.Component {
     let currentPage = this.state.currentPage;
 
     if (totalPages && currentPage<totalPages)
-      this.setState({currentPage: currentPage+1});
+      this.setState({
+        currentPage: currentPage+1,
+        datasetLoad: true
+      });
   }
 
   handlePrevChipTap() {
@@ -91,12 +93,16 @@ class QueryApp extends React.Component {
     let currentPage = this.state.currentPage;
 
     if (totalPages && currentPage>1)
-      this.setState({currentPage: currentPage-1});
+      this.setState({
+        currentPage: currentPage-1,
+        datasetLoad: true
+      });
   }
 
   handleDrawerChange(open) {
     this.setState({
-      drawerOpen: open
+      drawerOpen: open,
+      datasetLoad: false
     });
   }
 
@@ -122,11 +128,25 @@ class QueryApp extends React.Component {
     if (currentPage) currentPage = 1;
     this.setState({
       itemsPage: value,
-      currentPage: currentPage
+      currentPage: currentPage,
+      datasetLoad: true
     });
   }
 
-  _onResource(resource) {
+  handleClickResource(resource) {
+    if (resource.baseType==="resourceGroup") {
+      // A folder resource has been clicked on => make the folder the new parent.
+      this.parentList.push(this.state.parent);
+      this.setState({
+        parent: resource.id,
+        datasetLoad: false,
+      });
+    } else if (resource.baseType==="dataset") {
+      this.onResource(resource);      
+    }
+  }
+
+  onResource(resource) {
     let keyHeaderList = {};
 
     _.forEach(resource.schemaDefinition.dataSchema, (val, key) => {
@@ -139,7 +159,7 @@ class QueryApp extends React.Component {
         this.setState({
           snackBarMessage: "Can't load dataset " + resource.name ,
           snackBarOpen: true,
-          loadResource: false,
+          resourceLoad: false,
           datasetLoad: false,
         });
       } else {
@@ -168,15 +188,7 @@ class QueryApp extends React.Component {
     });
   }
 
-  _onFolder(folder) {
-    // A folder resource has been clicked on => make the folder the new parent.
-    this.parentList.push(this.state.parent);
-    this.setState({
-      parent: folder.id
-    });
-  }
-
-  _onBack() {
+  onBack() {
     const parent = this.parentList.pop();
     this.setState({
       parent: parent
@@ -184,7 +196,6 @@ class QueryApp extends React.Component {
   }
 
   onQueryHandle() {
-    console.log(this.state.datasetFilter);
   }
 
   onAggregateHandle() {
@@ -262,27 +273,15 @@ class QueryApp extends React.Component {
       style={styles.backButton}
       disabled={this.parentList.length ? false : true}
       icon={<FontIcon className="material-icons">arrow_back</FontIcon>}
-      onTouchTap={this._onBack}
+      onTouchTap={this.onBack}
       label="Back"
       />;
 
-    // Filter to retrieve folder resources that are children of the current parent.
-    const folderFilter = { parents: parentId, baseType: "resourceGroup" };
-
-    // Filter to retrieve non-folder resources that are children of the current parent.
-    const fileFilter = { parents: parentId, baseType: { $ne: "resourceGroup" } };
-    const folderComponent = <ResourceList
-      load={this.state.resourceLoad}
-      filter={folderFilter}
-      options={{ sort: { sortName: 1 } }}
-      onSelect={this._onFolder} type={true}
-      />;
     const resourceComponent = <ResourceList
       load={this.state.resourceLoad}
-      filter={fileFilter}
+      filter={{ parents: parentId}}
       options={{ sort: { sortName: 1 } }}
-      onSelect={this._onResource}
-      type={false}
+      onSelect={this.handleClickResource} type={true}
       />;
 
     const checkBoxList = _.map(this.state.keyHeaderList, (val, key) => {
@@ -361,7 +360,6 @@ class QueryApp extends React.Component {
       <div style={styles.root}>
         <div style={styles.leftPanel}>
           {backButton}
-          {folderComponent}
           {resourceComponent}
           <TextField
             hintText="Filter"
@@ -392,8 +390,8 @@ class QueryApp extends React.Component {
             {nameChipComponent}
             {totalCountChipComponent}
             {prevChipComponent}
+            {pageComponent}            
             {nextChipComponent}
-            {pageComponent}
           </div>
           <TableContainer
             keyHeaderList={this.state.keyHeaderList}

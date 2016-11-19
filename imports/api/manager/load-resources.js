@@ -4,7 +4,7 @@ import connectionManager from "./connection-manager";
 // filter - an optional query filter to refine the returned data, e.g. {name: "my resource"}
 // options - options to tweak the returned data, e.g. { sort: { name: -1 }, limit: 1, fields: {name: 1}} will sort by name descending, limit the result to 1 item, and only return the name field in each document, i.e. return the last resource when sorted alphabetically by name
 function loadResource({load, filter, options}, onData) {
-  //if (load) {
+  if (load) {
     console.log("loadResource: ", filter, options);
 
     // Subscribe to the resources publication using the given filter and options.
@@ -21,9 +21,9 @@ function loadResource({load, filter, options}, onData) {
       // Pass on to the component via the resources property.
       onData(null, {resources: resources});
     }
-  //} else {
-  //  onData(null, {resources: []});
-  //}
+  } else {
+    onData(null, {resources: []});
+  }
 }
 
 export default loadResource;

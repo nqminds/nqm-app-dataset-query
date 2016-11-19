@@ -9,12 +9,14 @@ class TableContent extends React.Component {
   }
 
   componentWillMount() {
-    if (this.props.data.length)
+    //if (this.props.data.length)
+    if (this.props.load)
       this.tableData = _.clone(this.props.data);
   }
 
   componentWillReceiveProps(nextprops) {
-    if (nextprops.data.length)
+    //if (nextprops.data.length)
+    if (nextprops.load)
       this.tableData = _.clone(nextprops.data);
   }
 
@@ -64,6 +66,7 @@ class TableContent extends React.Component {
 }
 
 TableContent.propTypes = {
+  load: React.PropTypes.bool.isRequired,
   data: React.PropTypes.array.isRequired,
   keyHeaderList: React.PropTypes.object.isRequired
 };
