@@ -3,12 +3,15 @@ import connectionManager from "./connection-manager";
 
 // Loads data for a given resource id from the TDX.
 // filter - an optional query filter to refine the returned data, e.g. {temperature: {$gt: 20}}
-// opt - options to tweak the returned data, e.g. { sort: { timestamp: -1 }, limit: 10, fields: {temperature: 1}} will sort by timestamp descending, limit the result to 10 items, and only return the temperature field in each document.
-// load - set to true loads the resourse, set to false passes an empty output
+// options - options to tweak the returned data, e.g. { sort: { timestamp: -1 }, limit: 10, fields: {temperature: 1}} will sort by timestamp descending, limit the result to 10 items, and only return the temperature field in each document.
+// pipeline - string for aggregate query
+// type - set to "Query" or "Aggregate"
 function loadResourceData({
     resourceId,
     filter,
-    options
+    options,
+    pipeline,
+    type
 }, onData) {
   if (resourceId!==null) {
     const config = {
@@ -16,26 +19,42 @@ function loadResourceData({
       queryHost: Meteor.settings.public.queryHost,
       accessToken: connectionManager.authToken
     };
+
     const tdxApi = new TDXAPI(config);
-
-
     const _filter = filter || "";
     const _options = options || "";
+    const _pipeline = pipeline || "";
+    const _type = type || "";
 
-    console.log("loadResourceData tdxApi: ", resourceId, _filter, _options);
+    console.log("loadResourceData tdxApi: ", resourceId, _filter, _options, _pipeline);
 
-    tdxApi.getDatasetData(resourceId, _filter, null, _options, (err, response) => {
-      if (err) {
-        console.log("Failed to get data: ", err);
-        onData(err, {
-          data: []
-        });
-      } else {
-        onData(null, {
-          data: response.data
-        });
-      }
-    });
+    if (type==="Query") {
+      tdxApi.getDatasetData(resourceId, _filter, null, _options, (err, response) => {
+        if (err) {
+          console.log("Failed to get query data: ", err);
+          onData(err, {
+            data: []
+          });
+        } else {
+          onData(null, {
+            data: response.data
+          });
+        }
+      });
+    } else if (type==="Aggregate") {
+      tdxApi.getAggregateData(resourceId, _pipeline, _options, (err, response) => {
+        if (err) {
+          console.log("Failed to get aggregate data: ", err);
+          onData(err, {
+            data: []
+          });
+        } else {
+          onData(null, {
+            data: response.data
+          });
+        }        
+      });
+    }
   } else {
     onData(null, {
       data: []

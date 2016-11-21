@@ -447,6 +447,7 @@ class QueryApp extends React.Component {
             resourceId={this.state.datasetID}
             filter={datasetFilter}
             options={datasetOptions}
+            type={this.state.searchType}
           />
         </div>
         <Snackbar
