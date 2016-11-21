@@ -39,7 +39,7 @@
     "@types/lodash": "^4.14.37"
   },
   "description": "NQM App Dataset Query",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nqminds/nqm-app-datasetquery.git"

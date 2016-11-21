@@ -8,7 +8,7 @@ import QueryApp from "../../ui/pages/QueryApp";
 
 var sharedkey;
 
-if (Meteor.settings.public.sharedKeyFile && process.env.NODE_ENV=="development")
+if (Meteor.settings.public.sharedKeyFile && process.env.NODE_ENV=="devhost")
   sharedkey = require("../../../"+Meteor.settings.public.sharedKeyFile);
 
 injectTapEventPlugin();

@@ -2,6 +2,7 @@ import React from "react";
 
 import { List, ListItem } from "material-ui/List";
 import ResourceIcon from "./resource-icon";
+import Infinite from "react-infinite";
 import * as _ from "lodash";
 
 class ResourceList extends React.Component {
@@ -45,7 +46,9 @@ class ResourceList extends React.Component {
 
     return (
       <List>
-        {list}
+        <Infinite containerHeight={300} elementHeight={50}>
+          {list}
+        </Infinite>
       </List>);
   }
 }
