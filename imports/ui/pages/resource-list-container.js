@@ -18,4 +18,4 @@ const options={
 };
 
 // Use the loadResources composer to populate the "resources" property of the ResourceList component.
-export default composeWithTracker(loadResources,  options)(ResourceList);
+export default composeWithTracker(loadResources, options)(ResourceList);

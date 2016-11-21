@@ -51,7 +51,6 @@ class ResourceList extends React.Component {
 }
 
 ResourceList.propTypes = {
-  load: React.PropTypes.bool.isRequired,
   resources: React.PropTypes.array.isRequired,
   onSelect: React.PropTypes.func.isRequired
 };

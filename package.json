@@ -13,6 +13,7 @@
     "https": "^1.0.0",
     "index.js": "0.0.3",
     "lodash": "^4.16.6",
+    "lodash.clone": "^4.4.0",
     "material-ui": "^0.15.4",
     "meteor-node-stubs": "^0.2.3",
     "moment": "^2.15.2",

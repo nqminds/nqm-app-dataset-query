@@ -43,12 +43,6 @@ class QueryApp extends React.Component {
     this.handlePipelineChange = this.handlePipelineChange.bind(this);
     this.handleClickResource = this.handleClickResource.bind(this);
     this.parentList = [];
-
-    this.queryCount = 0;
-    this.datasetOptions = {};
-    this.datasetFilter = {};
-    this.datasetPipeline = [];
-    this.searchType = null;
     
     this.state = {
       snackBarMessage: "",
@@ -64,59 +58,51 @@ class QueryApp extends React.Component {
       datasetOptionsText: "{}",
       datasetFilterText: "{}",
       datasetPipelineText: "[]",
-      datasetLoad: false,
-      resourceLoad: true,
+      datasetOptions: {},
+      datasetFilter: {},
+      datasetPipeline: [],
       currentPage: 0,
       commandButtonState: true,
-      queryCount: null
+      queryCount: null,
+      searchType: searchTypes.query
     };
   }
 
   handleSnackbarClose() {
     this.setState({
-      snackBarOpen: false,
-      datasetLoad: false,
-      resourceLoad: false
+      snackBarOpen: false
     });
   }
 
   handleNameChipTap() {
     this.setState({
-      drawerOpen: true,
-      datasetLoad: false,
-      resourceLoad: false
+      drawerOpen: true
     });
   }
 
   handleNextChipTap() {
-    let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+    let totalPages = _.ceil(this.state.queryCount/itemsPageData[this.state.itemsPage]);
     let currentPage = this.state.currentPage;
 
     if (totalPages && currentPage<totalPages)
       this.setState({
-        currentPage: currentPage+1,
-        datasetLoad: true,
-        resourceLoad: false
+        currentPage: currentPage+1
       });
   }
 
   handlePrevChipTap() {
-    let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+    let totalPages = _.ceil(this.state.queryCount/itemsPageData[this.state.itemsPage]);
     let currentPage = this.state.currentPage;
 
     if (totalPages && currentPage>1)
       this.setState({
-        currentPage: currentPage-1,
-        datasetLoad: true,
-        resourceLoad: false
+        currentPage: currentPage-1
       });
   }
 
   handleDrawerChange(open) {
     this.setState({
-      drawerOpen: open,
-      datasetLoad: false,
-      resourceLoad: false
+      drawerOpen: open
     });
   }
 
@@ -132,9 +118,7 @@ class QueryApp extends React.Component {
 
     if (result)
       this.setState({
-        keyHeaderList: keyHeaderList,
-        datasetLoad: false,
-        resourceLoad: false
+        keyHeaderList: keyHeaderList
       });
   }
 
@@ -143,9 +127,7 @@ class QueryApp extends React.Component {
     if (currentPage) currentPage = 1;
     this.setState({
       itemsPage: value,
-      currentPage: currentPage,
-      datasetLoad: true,
-      resourceLoad: false
+      currentPage: currentPage
     });
   }
 
@@ -154,9 +136,7 @@ class QueryApp extends React.Component {
       // A folder resource has been clicked on => make the folder the new parent.
       this.parentList.push(this.state.parent);
       this.setState({
-        parent: resource.id,
-        datasetLoad: false,
-        resourceLoad: true
+        parent: resource.id
       });
     } else if (resource.baseType==="dataset") {
       this.onResource(resource);      
@@ -175,31 +155,25 @@ class QueryApp extends React.Component {
       if (err) {
         this.setState({
           snackBarMessage: "Can't load dataset " + resource.name ,
-          snackBarOpen: true,
-          resourceLoad: false,
-          datasetLoad: false,
+          snackBarOpen: true
         });
       } else {
         if (data.data.length) {
-          this.queryCount = data.data[0].count;
-
           this.setState({
             datasetName: resource.name,
             datasetID: resource.id,
             schemaDefinition: resource.schemaDefinition,
             keyHeaderList: keyHeaderList,
             totalCount: data.data[0].count,
-            datasetLoad: true,
             currentPage: 1,
-            resourceLoad: false,
-            commandButtonState: false
+            commandButtonState: false,
+            queryCount: data.data[0].count,
+            searchType: searchTypes.query
           });
         } else {
           this.setState({
             snackBarMessage: "Dataset " + resource.name + " has no schema!",
-            snackBarOpen: true,
-            resourceLoad: false,
-            datasetLoad: false,
+            snackBarOpen: true
           });
         }
       }
@@ -209,9 +183,7 @@ class QueryApp extends React.Component {
   onBack() {
     const parent = this.parentList.pop();
     this.setState({
-      parent: parent,
-      datasetLoad: false,
-      resourceLoad: true
+      parent: parent
     });
   }
 
@@ -228,60 +200,55 @@ class QueryApp extends React.Component {
           this.setState({
             snackBarMessage: "Can't get query count for " + this.state.datasetName ,
             snackBarOpen: true,
-            resourceLoad: false,
-            datasetLoad: false,
             datasetFilterText: JSON.stringify(datasetFilter, null, "\t"),
             datasetOptionsText: JSON.stringify(datasetOptions, null, "\t")
           });
         } else {
-          this.datasetFilter = datasetFilter;
-          this.datasetOptions = datasetOptions;
-          this.searchType = searchTypes.query;
           this.setState({
             queryCount: data.data[0].count,
-            datasetLoad: true,
             currentPage: 1,
-            resourceLoad: false,
             datasetFilterText: JSON.stringify(datasetFilter, null, "\t"),
-            datasetOptionsText: JSON.stringify(datasetOptions, null, "\t")
+            datasetOptionsText: JSON.stringify(datasetOptions, null, "\t"),
+            datasetFilter: datasetFilter,
+            datasetOptions: datasetOptions,
+            searchType: searchTypes.query
           });
         }
       });
     } catch(e) {
+      const filter = this.state.datasetFilterText===""?"{}":this.state.datasetFilterText;
+      const options = this.state.datasetOptionsText===""?"{}":this.state.datasetOptionsText;
       this.setState({
         snackBarMessage: e.toString(),
         snackBarOpen: true,
-        resourceLoad: false,
-        datasetLoad: false,
+        datasetFilterText: filter,
+        datasetOptionsText: options
       });
     }
   }
 
   onAggregateHandle() {
-    this.searchType = searchTypes.aggregate;
+    this.setState({
+      searchType: searchTypes.aggregate
+    });
+    
   }
 
   handleFilterChange(event) {
     this.setState({
-      datasetFilterText: event.target.value,
-      datasetLoad: false,
-      resourceLoad: false
+      datasetFilterText: event.target.value
     });
   }
 
   handleOptionsChange(event) {
     this.setState({
-      datasetOptionsText: event.target.value,
-      datasetLoad: false,
-      resourceLoad: false
+      datasetOptionsText: event.target.value
     });
   }
 
   handlePipelineChange(event) {
     this.setState({
-      datasetPipelineText: event.target.value,
-      datasetLoad: false,
-      resourceLoad: false
+      datasetPipelineText: event.target.value
     });    
   }
 
@@ -340,10 +307,9 @@ class QueryApp extends React.Component {
       />;
 
     const resourceComponent = <ResourceList
-      load={this.state.resourceLoad}
       filter={{ parents: parentId}}
       options={{ sort: { sortName: 1 } }}
-      onSelect={this.handleClickResource} type={true}
+      onSelect={this.handleClickResource}
       />;
 
     const checkBoxList = _.map(this.state.keyHeaderList, (val, key) => {
@@ -390,12 +356,12 @@ class QueryApp extends React.Component {
     if (this.state.queryCount !== null) {
       queryCountComponent =
         <Chip style={styles.chip}>
-          {this.searchType}: {this.state.queryCount}
+          {this.state.searchType}: {this.state.queryCount}
         </Chip>;
     }
 
-    if (this.queryCount > itemsPageData[this.state.itemsPage]) {
-      let totalPages = _.ceil(this.queryCount/itemsPageData[this.state.itemsPage]);
+    if (this.state.queryCount > itemsPageData[this.state.itemsPage]) {
+      let totalPages = _.ceil(this.state.queryCount/itemsPageData[this.state.itemsPage]);
 
       nextChipComponent =
           <Chip
@@ -419,10 +385,13 @@ class QueryApp extends React.Component {
           </Chip>;
     }
 
-    this.datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
-    if (this.state.currentPage>1)
-      this.datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
+    const datasetFilter = _.clone(this.state.datasetFilter); 
+    let datasetOptions = _.clone(this.state.datasetOptions);
 
+    datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
+    if (this.state.currentPage>1)
+      datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
+    
     return (
       <div style={styles.root}>
         <div style={styles.leftPanel}>
@@ -476,9 +445,8 @@ class QueryApp extends React.Component {
           <TableContainer
             keyHeaderList={this.state.keyHeaderList}
             resourceId={this.state.datasetID}
-            filter={this.datasetFilter}
-            options={this.datasetOptions}
-            load={this.state.datasetLoad}
+            filter={datasetFilter}
+            options={datasetOptions}
           />
         </div>
         <Snackbar
