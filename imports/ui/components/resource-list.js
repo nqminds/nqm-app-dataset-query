@@ -11,13 +11,11 @@ class ResourceList extends React.Component {
   }
 
   componentWillMount() {
-    if (this.props.load)
-      this.resources = this.props.resources;
+    this.resources = this.props.resources;
   }
 
   componentWillReceiveProps(nextprops) {
-    if (nextprops.load)
-      this.resources = nextprops.resources;
+    this.resources = nextprops.resources;
   }
 
   _onListSelect(resource) {

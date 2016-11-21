@@ -20,6 +20,7 @@ import ResourceList from "./resource-list-container";
 import TableContainer from "./table-container";
 
 const itemsPageData = { 1: 10, 2: 50, 3: 100, 4: 1000 };
+const searchTypes = {aggregate:"Aggregate", query:"Query"};
 
 class QueryApp extends React.Component {
   constructor(props) {
@@ -44,7 +45,11 @@ class QueryApp extends React.Component {
     this.parentList = [];
 
     this.queryCount = 0;
-
+    this.datasetOptions = {};
+    this.datasetFilter = {};
+    this.datasetPipeline = [];
+    this.searchType = null;
+    
     this.state = {
       snackBarMessage: "",
       snackBarOpen: false,
@@ -56,9 +61,9 @@ class QueryApp extends React.Component {
       keyHeaderList: {},
       totalCount: null,
       itemsPage: 1,
-      datasetOptions: "{}",
-      datasetFilter: "{}",
-      datasetPipeline: "[]",
+      datasetOptionsText: "{}",
+      datasetFilterText: "{}",
+      datasetPipelineText: "[]",
       datasetLoad: false,
       resourceLoad: true,
       currentPage: 0,
@@ -212,8 +217,9 @@ class QueryApp extends React.Component {
 
   onQueryHandle() {
     try {
-      JSON.parse(this.state.datasetFilter);
-      const queryCount = "[{\"$match\":" + this.state.datasetFilter + "}," +
+      const datasetFilter = JSON.parse(this.state.datasetFilterText);
+      const datasetOptions = JSON.parse(this.state.datasetOptionsText);
+      const queryCount = "[{\"$match\":" + this.state.datasetFilterText + "}," +
         "{\"$group\":{\"_id\":null, \"count\":{\"$sum\":1}}}]";
       //{"SiteCode":{"$eq":"BG1"}}
 
@@ -224,13 +230,20 @@ class QueryApp extends React.Component {
             snackBarOpen: true,
             resourceLoad: false,
             datasetLoad: false,
+            datasetFilterText: JSON.stringify(datasetFilter, null, "\t"),
+            datasetOptionsText: JSON.stringify(datasetOptions, null, "\t")
           });
         } else {
+          this.datasetFilter = datasetFilter;
+          this.datasetOptions = datasetOptions;
+          this.searchType = searchTypes.query;
           this.setState({
             queryCount: data.data[0].count,
             datasetLoad: true,
             currentPage: 1,
-            resourceLoad: false
+            resourceLoad: false,
+            datasetFilterText: JSON.stringify(datasetFilter, null, "\t"),
+            datasetOptionsText: JSON.stringify(datasetOptions, null, "\t")
           });
         }
       });
@@ -245,12 +258,12 @@ class QueryApp extends React.Component {
   }
 
   onAggregateHandle() {
-
+    this.searchType = searchTypes.aggregate;
   }
 
   handleFilterChange(event) {
     this.setState({
-      datasetFilter: event.target.value,
+      datasetFilterText: event.target.value,
       datasetLoad: false,
       resourceLoad: false
     });
@@ -258,15 +271,15 @@ class QueryApp extends React.Component {
 
   handleOptionsChange(event) {
     this.setState({
-      datasetOptions: event.target.value,
+      datasetOptionsText: event.target.value,
       datasetLoad: false,
       resourceLoad: false
-    });    
+    });
   }
 
   handlePipelineChange(event) {
     this.setState({
-      datasetPipeline: event.target.value,
+      datasetPipelineText: event.target.value,
       datasetLoad: false,
       resourceLoad: false
     });    
@@ -370,14 +383,14 @@ class QueryApp extends React.Component {
     if (this.state.totalCount !== null) {
       totalCountChipComponent =
         <Chip style={styles.chip}>
-          {this.state.totalCount}
+          Total: {this.state.totalCount}
         </Chip>;
     }
 
     if (this.state.queryCount !== null) {
       queryCountComponent =
         <Chip style={styles.chip}>
-          {this.state.queryCount}
+          {this.searchType}: {this.state.queryCount}
         </Chip>;
     }
 
@@ -406,13 +419,9 @@ class QueryApp extends React.Component {
           </Chip>;
     }
 
-    let self = this;
-    let datasetOptions = JSON.parse(this.state.datasetOptions);
-    datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
-    let datasetFilter = JSON.parse(this.state.datasetOptions);
-
+    this.datasetOptions["limit"] = itemsPageData[this.state.itemsPage];
     if (this.state.currentPage>1)
-      datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
+      this.datasetOptions["skip"] = itemsPageData[this.state.itemsPage]*(this.state.currentPage-1); 
 
     return (
       <div style={styles.root}>
@@ -422,21 +431,21 @@ class QueryApp extends React.Component {
           <TextField
             hintText="Filter"
             floatingLabelText="Filter"
-            value={this.state.datasetFilter}
+            value={this.state.datasetFilterText}
             multiLine={true} rows={1} rowsMax={4}
             onChange={this.handleFilterChange}
           />
           <TextField
             hintText="Options"
             floatingLabelText="Options"
-            value={this.state.datasetOptions}
+            value={this.state.datasetOptionsText}
             multiLine={true} rows={1} rowsMax={4}
             onChange={this.handleOptionsChange}
           />
           <TextField
             hintText="Pipeline"
             floatingLabelText="Pipeline"
-            value={this.state.datasetPipeline}
+            value={this.state.datasetPipelineText}
             multiLine={true} rows={1} rowsMax={4}
             onChange={this.handlePipelineChange}
           />
@@ -467,8 +476,8 @@ class QueryApp extends React.Component {
           <TableContainer
             keyHeaderList={this.state.keyHeaderList}
             resourceId={this.state.datasetID}
-            filter={this.state.datasetFilter}
-            options={datasetOptions}
+            filter={this.datasetFilter}
+            options={this.datasetOptions}
             load={this.state.datasetLoad}
           />
         </div>
@@ -482,7 +491,7 @@ class QueryApp extends React.Component {
           {checkBoxList}
           <SelectField
             floatingLabelText="Items per page"
-            value={self.state.itemsPage}
+            value={this.state.itemsPage}
             onChange={this.handleItemsPageChange.bind(this)}
           >
             {listMenuItems}
