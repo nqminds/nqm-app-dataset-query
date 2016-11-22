@@ -1,5 +1,9 @@
 "use strict";
 
+// REVIEW - make the file name consistent - query-app.js
+// In general there's quite a lot going on in this component, and it might benefit from
+// re-factoring into sub-components, esp. where the data loading is concerned.
+
 import React from "react";
 import { Meteor } from "meteor/meteor";
 import Snackbar from "material-ui/Snackbar";
@@ -150,6 +154,11 @@ class QueryApp extends React.Component {
       keyHeaderList[key] = true;
     });
 
+    // REVIEW - neat use of aggregates to get the count, but I think tdxApi.getDatasetDataCount is probably better/clearer.
+    // Also, not sure it's a good idea to make an asynchonous call from within a React event handler - the component 
+    // might get unloaded before the callback is called. The conventional approach would be to create a sub-component
+    // and set props on it from the event handler. That will cause the dataLoader for the sub-component to fire and
+    // load the data.
     const queryCount = "[{\"$group\":{\"_id\":null, \"count\":{\"$sum\":1}}}]";
     this.tdxApi.getAggregateData(resource.id, queryCount, null, (err, data) => {
       if (err) {
@@ -195,6 +204,7 @@ class QueryApp extends React.Component {
         "{\"$group\":{\"_id\":null, \"count\":{\"$sum\":1}}}]";
       //{"SiteCode":{"$eq":"BG1"}}
 
+      // REVIEW - see onResource above.
       this.tdxApi.getAggregateData(this.state.datasetID, queryCount, null, (err, data) => {
         if (err) {
           this.setState({
