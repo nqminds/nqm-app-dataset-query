@@ -10,8 +10,7 @@ const options={
   propsToWatch: ["filter", "options"],
 
   shouldSubscribe(currentProps, nextProps) {
-    if (_.isEqual(currentProps.filter, nextProps.filter) &&
-        _.isEqual(currentProps.options, nextProps.options))
+    if (_.isEqual(currentProps, nextProps))
       return false;
     return true;
   },

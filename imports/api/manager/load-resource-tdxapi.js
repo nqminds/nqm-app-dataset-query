@@ -22,8 +22,6 @@ function loadResourceData({
 
     const tdxApi = new TDXAPI(config);
 
-    // REVIEW - by convention, using underscores to prefix a variable implies the variable is static or private scope, 
-    // i.e. don't use it for local variables.
     filter = filter || "";
     options = options || "";
     pipeline = pipeline || "";

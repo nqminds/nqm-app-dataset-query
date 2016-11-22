@@ -10,9 +10,7 @@ const options={
   propsToWatch: ["resourceId", "filter", "options"],
 
   shouldSubscribe(currentProps, nextProps) {
-    if (currentProps.resourceId===nextProps.resourceId &&
-        _.isEqual(currentProps.filter, nextProps.filter) &&
-        _.isEqual(currentProps.options, nextProps.options))
+    if (_.isEqual(currentProps,nextProps))
       return false;
     return true;
   },
