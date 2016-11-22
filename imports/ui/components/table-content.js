@@ -5,6 +5,10 @@ import * as _ from "lodash";
 class TableContent extends React.Component {
   constructor(props) {
     super(props);
+
+    // REVIEW - shouldn't usually store data directly on 'this', but use React properties or the state API, which 
+    // will handle re-rendering when data changes - unless you specifically don't want to trigger a re-render 
+    // when data changes - but that doesn't appear to be the case here, it looks like you should be using props?
     this.tableData = [];
   }
 

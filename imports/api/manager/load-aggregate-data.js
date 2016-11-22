@@ -1,5 +1,14 @@
 import connectionManager from "./connection-manager";
 
+/*
+ * REVIEW - the meteorhacks:aggregate package is not reactive and using it doesn't provide any benefits
+ * over the nqm-api-tdx methods getAggregateData (https://github.com/nqminds/nqm-api-tdx/blob/master/lib/aggregate.js#L13)
+ * and, if you're using it for counting, getDatasetDataCount (https://github.com/nqminds/nqm-api-tdx/blob/master/lib/query.js#L81).
+ * In fact, I suspect the nqm-api-tdx versions (i.e. over HTTP) will be quicker and more efficient that the DDP
+ * meteorhacks implementation. 
+ */
+
+
 // Loads data for a given resource id from the TDX.
 // pipeline - A sequence of data aggregation operations or stages.,
 //              e.g. [{ $match: { status: "A" } },
