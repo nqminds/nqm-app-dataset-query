@@ -24,15 +24,15 @@ function loadResourceData({
 
     // REVIEW - by convention, using underscores to prefix a variable implies the variable is static or private scope, 
     // i.e. don't use it for local variables.
-    const _filter = filter || "";
-    const _options = options || "";
-    const _pipeline = pipeline || "";
-    const _type = type || "";
+    filter = filter || "";
+    options = options || "";
+    pipeline = pipeline || "";
+    type = type || "";
 
-    console.log("loadResourceData tdxApi: ", resourceId, _filter, _options, _pipeline);
+    console.log("loadResourceData tdxApi: ", resourceId, filter, options, pipeline);
 
     if (type==="Query") {
-      tdxApi.getDatasetData(resourceId, _filter, null, _options, (err, response) => {
+      tdxApi.getDatasetData(resourceId, filter, null, options, (err, response) => {
         if (err) {
           console.log("Failed to get query data: ", err);
           onData(err, {
@@ -45,7 +45,7 @@ function loadResourceData({
         }
       });
     } else if (type==="Aggregate") {
-      tdxApi.getAggregateData(resourceId, _pipeline, _options, (err, response) => {
+      tdxApi.getAggregateData(resourceId, pipeline, options, (err, response) => {
         if (err) {
           console.log("Failed to get aggregate data: ", err);
           onData(err, {

@@ -5,33 +5,22 @@ import * as _ from "lodash";
 class TableContent extends React.Component {
   constructor(props) {
     super(props);
-
-    // REVIEW - shouldn't usually store data directly on 'this', but use React properties or the state API, which 
-    // will handle re-rendering when data changes - unless you specifically don't want to trigger a re-render 
-    // when data changes - but that doesn't appear to be the case here, it looks like you should be using props?
-    this.tableData = [];
-  }
-
-  componentWillMount() {
-    this.tableData = _.clone(this.props.data);
-  }
-
-  componentWillReceiveProps(nextprops) {
-    this.tableData = _.clone(nextprops.data);
   }
 
   render() {
     let tableRowList = null;
     let keyList = [];
 
+    // Create the table header based on schema
     if (!_.isEmpty(this.props.keyHeaderList)) {
       _.forEach(this.props.keyHeaderList, (val,key)=>{
         if (val) keyList.push(key);
       });
     }
 
-    if (this.tableData.length) {
-      tableRowList = this.tableData.map((row, index)=>{
+    // Initialise the material-ui table with data from props.data
+    if (this.props.data.length) {
+      tableRowList = this.props.data.map((row, index)=>{
         let rowObj = _.map(keyList,(val)=>{
           let entry = "";
           if (row[val]!==null && !_.isObject(row[val])) entry = row[val];
@@ -68,6 +57,10 @@ class TableContent extends React.Component {
 TableContent.propTypes = {
   data: React.PropTypes.array.isRequired,
   keyHeaderList: React.PropTypes.object.isRequired
+};
+
+TableContent.defaultProps = {
+  data: []
 };
 
 export default TableContent;

@@ -4,11 +4,11 @@ import { FlowRouter } from "meteor/kadira:flow-router";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import connectionManager from "../../api/manager/connection-manager";
 import Layout from "../../ui/layouts/layout-container";
-import QueryApp from "../../ui/pages/QueryApp";
+import QueryApp from "../../ui/pages/query-app";
 
 var sharedkey;
 
-if (Meteor.settings.public.sharedKeyFile && process.env.NODE_ENV=="devhost")
+if (Meteor.settings.public.sharedKeyFile && process.env.NODE_ENV=="development")
   sharedkey = require("../../../"+Meteor.settings.public.sharedKeyFile);
 
 injectTapEventPlugin();
